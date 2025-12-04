@@ -1,5 +1,6 @@
 use cid::Cid;
 use multihash::{Error, Multihash};
+use rand::RngCore;
 use sha2::{Digest, Sha256};
 
 const SHA2_256: u64 = 0x12;
@@ -24,16 +25,15 @@ impl PartialEq<Self> for Block {
     }
 }
 
+pub fn make_random_block(size: usize) -> Block {
+    let mut data = vec![0u8; size];
+    rand::rng().fill_bytes(&mut data);
+    Block::new(data).unwrap()
+}
+
 #[cfg(test)]
 pub mod tests {
-    use rand::RngCore;
     use super::*;
-
-    pub fn make_random_block(size: usize) -> Block {
-        let mut data = vec![0u8; size];
-        rand::rng().fill_bytes(&mut data);
-        Block::new(data).unwrap()
-    }
 
     #[test]
     pub fn should_evaluate_equal_blocks_as_equal() {

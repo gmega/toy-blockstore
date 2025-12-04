@@ -77,6 +77,7 @@ impl Blockstore for FSStore {
     async fn get_block(&self, cid: &Cid) -> Result<Option<Block>, io::Error> {
         let block_path = self.block_path(&cid);
         let contents = fs::read(block_path)?;
+
         match Block::new(contents) {
             Ok(block) => Ok(Some(block)),
             Err(e) => Err(io::Error::new(io::ErrorKind::Other, e)),
@@ -92,10 +93,10 @@ impl Blockstore for FSStore {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::block::tests::make_random_block;
     use std::cmp::min;
     use std::fs;
     use tempfile::{tempdir, TempDir};
+    use crate::block::make_random_block;
 
     pub async fn make_fs_store() -> (FSStore, TempDir) {
         let tempdir = tempdir().unwrap();
@@ -142,7 +143,6 @@ mod tests {
         let retrieved = store.get_block(&stored.cid).await.unwrap().unwrap();
         assert_eq!(stored, retrieved);
     }
-
     #[tokio::test(flavor = "multi_thread", worker_threads = 1)]
     async fn should_contain_stored_blocks() {
         let (store, _) = make_fs_store().await;
